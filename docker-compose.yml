@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploaded_docs:/app/uploaded_docs
+      - ./rag_system.db:/app/rag_system.db
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    image: python:3.12-slim
+    working_dir: /app
+    command: >
+      bash -c "pip install streamlit requests -i https://pypi.tuna.tsinghua.edu.cn/simple
+      && streamlit run frontend.py --server.port 8501 --server.address 0.0.0.0"
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - API_BASE=http://api:8000
+    depends_on:
+      - api
